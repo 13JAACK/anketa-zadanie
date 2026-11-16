@@ -1,33 +1,48 @@
-from validators import parse_line
-from storage import read_input, write_results
-from report import print_report
+
+from registry import Registry
+
+
+INPUT_FILE = "anketa.txt"
 
 
 def main():
-    lines = read_input()
-    if lines is None:
+    registry = Registry()
+
+    if not registry.load(INPUT_FILE):
+        print("Файл", INPUT_FILE, "не найден")
         return
 
-    good = []
-    bad = []
-    total = 0
+    print(f"{'№':<4}{'ФИО':<30}{'Роль':<16}"
+          f"{'Группа/кафедра':<22}{'Телефон':<22}")
+    print("-" * 94)
 
-    for num, line in enumerate(lines, 1):
-        if not line.strip():
-            continue
+    for number, person in enumerate(registry.people, 1):
+        print(
+            f"{number:<4}{person.fio[:28]:<30}"
+            f"{person.role():<16}{person.extra():<22}"
+            f"{person.masked_phone():<22}"
+        )
 
-        total += 1
-        anketa, err = parse_line(line.rstrip("\n"))
+    print("-" * 94)
 
-        if err:
-            bad.append((num, line.strip(), err))
-        else:
-            good.append(anketa)
+    print("Принято:", len(registry))
+    print("Отклонено:", len(registry.bad))
 
-    print_report(good, bad, total)
-    write_results(good, bad)
+    print("\nСтатистика по ролям:")
+    for role, count in sorted(registry.role_stats().items()):
+        print(role + ":", count)
 
-    print("Сохранено: ok.txt и errors.txt")
+    print("\nСтатистика по группам:")
+    for group, count in sorted(registry.group_stats().items()):
+        print(group + ":", count)
+
+    print("\nПричины отклонения:")
+    for number, raw, reason in registry.bad:
+        print("Строка", number, ":", reason)
+        print("Данные:", raw)
+
+    registry.save()
+    print("\nРезультаты сохранены в ok.txt и errors.txt")
 
 
 if __name__ == "__main__":
