@@ -1,5 +1,5 @@
 from validators import mask_phone
-INPUT_FILE = "anketa.txt"
+INPUT_FILE = "anketa_old.txt"
 OK_FILE = "ok.txt"
 ERR_FILE = "errors.txt"
 
