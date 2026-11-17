@@ -1,8 +1,9 @@
+
 name: Python checks
 
 on:
   push:
-    branches: [main, feature-update]
+    branches: [main, feature-update, improvement]
   pull_request:
     branches: [main]
 
@@ -19,8 +20,14 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Установка pytest
+        run: python -m pip install pytest
+
       - name: Проверка синтаксиса
-        run: python -m compileall -q main.py validators.py report.py storage.py
+        run: python -m compileall -q .
+
+      - name: Запуск тестов
+        run: python -m pytest -v
 
       - name: Запуск программы
         run: python main.py

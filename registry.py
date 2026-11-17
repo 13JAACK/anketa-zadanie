@@ -27,11 +27,16 @@ class Registry:
             except AnketaError as error:
                 self.bad.append((number, line.strip(), str(error)))
 
-        self.people.sort()
+        self.people.sort(
+            key=lambda person: person.fio.lower().replace("ё", "е")
+        )
         return True
 
     def __len__(self):
         return len(self.people)
+
+    def __iter__(self):
+        return iter(self.people)
 
     def role_stats(self):
         result = {}
@@ -65,6 +70,23 @@ class Registry:
                 )
 
         with open("errors.txt", "w", encoding="utf-8") as file:
+            for number, raw, reason in self.bad:
+                file.write(
+                    "Строка " + str(number) + ": " + reason + "\n"
+                )
+                file.write(raw + "\n\n")
+    def save_ok(self, filename="ok.txt"):
+        with open(filename, "w", encoding="utf-8") as file:
+            for person in self.people:
+                file.write(
+                    person.role() + ";"
+                    + person.fio + ";"
+                    + person.mail + ";"
+                    + person.masked_phone() + ";"
+                    + person.extra() + "\n"
+                )
+    def save_errors(self, filename="errors.txt"):
+        with open(filename, "w", encoding="utf-8") as file:
             for number, raw, reason in self.bad:
                 file.write(
                     "Строка " + str(number) + ": " + reason + "\n"

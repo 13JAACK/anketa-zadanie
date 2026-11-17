@@ -2,8 +2,8 @@
 class AnketaError(Exception):
     pass
 
-
 class Person:
+
     def __init__(self, fio, mail, phone):
         self.fio = self.check_fio(fio)
         self.mail = self.check_mail(mail)
@@ -16,12 +16,24 @@ class Person:
         if len(parts) < 2:
             raise AnketaError("в ФИО меньше двух слов")
 
-        return " ".join(p.title() for p in parts)
+        result = []
+
+        for word in parts:
+            if "-" in word:
+                parts_of_word = word.split("-")
+                word = "-".join(part.capitalize() for part in parts_of_word)
+            else:
+                word = word.capitalize()
+
+            result.append(word)
+
+        return " ".join(result)
 
     @staticmethod
     def check_mail(raw):
         mail = raw.strip().lower()
-
+        if any(ch.isspace() for ch in mail):
+            raise AnketaError("почта неверная: " + mail)
         if mail.count("@") != 1:
             raise AnketaError("почта неверная: " + mail)
 
@@ -86,12 +98,9 @@ class Person:
 class Student(Person):
     def __init__(self, fio, mail, phone, group):
         super().__init__(fio, mail, phone)
-
         group = group.strip().lower().replace(" ", "")
-
         if not group:
             raise AnketaError("пустая группа")
-
         self.group = group
 
     def role(self):
